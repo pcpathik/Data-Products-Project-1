@@ -1,0 +1,40 @@
+---
+title: "Volcanos in world"
+author: "Pathik Chamaria"
+date: "March 25, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(leaflet)
+library(rworldmap)
+library(ggplot2)
+newmap <- getMap()
+newmap.df <- fortify(newmap)
+```
+
+```{r echo=FALSE, }
+
+centeroids <- as.data.frame(coordinates(newmap))
+
+df <- data.frame(id = unique(newmap.df$id))
+a <- read.csv("D:/Data Science/Visualization/volcano.csv")
+b <- table(a$Country)
+c <- as.data.frame(b)
+df <- merge(df, c , by.x= "id", by.y="Var1", all.x=T)
+centeroids <- data.frame(centeroids, id=row.names(centeroids))
+df <- merge(df,centeroids, by="id")
+df.log<- df[!is.na(df$Freq),]
+a1 <- paste0("Number of Volcanos in <strong>", df.log$id, "</strong> are <strong>", df.log$Freq, "</strong>.")
+a2 <- paste(a$Latitude)
+a <- a[-44,]
+a <- a[-43,]
+
+leaflet() %>%
+    addTiles() %>%
+    addMarkers(df.log$V1, df.log$V2, popup = a1, clusterOptions = T) %>%
+    addCircleMarkers(a$Longitude, a$Latitude, radius = 1,popup = a2 )
+
+
+```
